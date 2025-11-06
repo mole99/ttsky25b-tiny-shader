@@ -19,12 +19,11 @@ module shader_memory #(
     // Load a new word from externally
     // Else just shift circularily
     assign last_instr = load_i ? instr_i : memory[0];
-    
-    generate
-    
+
     `ifndef COCOTB_SIM
-    wire [7:0] delay [NUM_INSTR];
+    generate
     genvar i, j;
+    wire [7:0] delay [NUM_INSTR];
     for (i=0; i<NUM_INSTR; i++) begin : gen_delays
         for (j=0; j<8; j++) begin : gen_bits
             if (i < NUM_INSTR-1) begin : gen_other
@@ -52,9 +51,8 @@ module shader_memory #(
             end
         end
     end
-    `endif
-    
     endgenerate
+    `endif
 
     // Initialize the memory on reset 
     // Shift the memory by a whole word if shift_i is high
@@ -88,15 +86,15 @@ module shader_memory #(
             if (shift_i) begin
                 for (int n=0; n<NUM_INSTR; n++) begin
                     `ifdef COCOTB_SIM
-                    if (i < NUM_INSTR-1) begin
-                        memory[i] <= memory[i+1];
+                    if (n < NUM_INSTR-1) begin
+                        memory[n] <= memory[n+1];
                     end else begin
                         // Load a new word from externally
                         if (load_i) begin
-                            memory[i] <= instr_i;
+                            memory[n] <= instr_i;
                         // Else just shift circularily
                         end else begin
-                            memory[i] <= memory[0];
+                            memory[n] <= memory[0];
                         end
                     end
                     `else

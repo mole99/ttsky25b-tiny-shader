@@ -2,7 +2,7 @@
 
 # Tiny Shader
 
-> [!NOTE]  
+> [!NOTE]
 > What is new in version 2?
 > - Increased the number of instructions from 10 to 16, 60% more instructions!
 > - Increased the core clock to 50.25 MHz, therefore increasing the resolution to 80x60 pixel, 25% more pixel!
