@@ -22,7 +22,7 @@ module shader_memory #(
     
     generate
     
-    `ifndef SIM
+    `ifndef COCOTB_SIM
     wire [7:0] delay [NUM_INSTR];
     genvar i, j;
     for (i=0; i<NUM_INSTR; i++) begin : gen_delays
@@ -87,7 +87,7 @@ module shader_memory #(
         end else begin
             if (shift_i) begin
                 for (int n=0; n<NUM_INSTR; n++) begin
-                    `ifdef SIM
+                    `ifdef COCOTB_SIM
                     if (i < NUM_INSTR-1) begin
                         memory[i] <= memory[i+1];
                     end else begin
