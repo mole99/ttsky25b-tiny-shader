@@ -115,6 +115,11 @@ async def test_vga_default(dut):
     # Assign default values
     dut.ena.value = 1
     dut.pause_execute.value = 0 # run shader
+    
+    dut.spi_sclk.value = 0
+    dut.spi_mosi.value = 0
+    #wire spi_miso;
+    dut.spi_cs.value = 0
 
     # Reset
     await reset_dut(dut.rst_n, 50)
