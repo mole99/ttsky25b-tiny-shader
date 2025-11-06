@@ -2,17 +2,27 @@
 # See https://docs.cocotb.org/en/stable/quickstart.html for more info
 
 # defaults
+PDK_ROOT ?= ~/.ciel
+PDK ?= sky130A
 SIM ?= icarus
 WAVES ?= 1
 TOPLEVEL_LANG ?= verilog
 SRC_DIR = $(PWD)/../src
-PROJECT_SOURCES = project.v
+PROJECT_SOURCES = tt_um_tiny_shader_v2_mole99.sv \
+		  tiny_shader_top.sv \
+		  shader_execute.sv \
+		  shader_memory.sv \
+  		  spi_receiver.sv \
+		  timing.sv \
+		  synchronizer.sv
 
 ifneq ($(GATES),yes)
 
 # RTL simulation:
 SIM_BUILD				= sim_build/rtl
 VERILOG_SOURCES += $(addprefix $(SRC_DIR)/,$(PROJECT_SOURCES))
+VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/primitives.v
+VERILOG_SOURCES += $(PDK_ROOT)/sky130A/libs.ref/sky130_fd_sc_hd/verilog/sky130_fd_sc_hd.v
 
 else
 
@@ -40,6 +50,8 @@ TOPLEVEL = tb
 
 # List test modules to run, separated by commas and without the .py suffix:
 COCOTB_TEST_MODULES = test
+#
+MODULE = test
 
 # include cocotb's make rules to take care of the simulator setup
 include $(shell cocotb-config --makefiles)/Makefile.sim
