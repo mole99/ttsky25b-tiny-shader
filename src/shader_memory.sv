@@ -14,15 +14,6 @@ module shader_memory #(
     output logic [7:0]  instr_o
 );
     logic [7:0] memory [NUM_INSTR];
-    
-    wire [7:0] delay [NUM_INSTR];
-
-    // TODO add dlygate3sd3_1
-    
-    /*dlygate4sd1
-    dlygate4sd2
-    dlygate4sd3*/
-    
     logic [7:0] last_instr;
     
     // Load a new word from externally
@@ -31,11 +22,12 @@ module shader_memory #(
     
     generate
     
+    `ifndef SIM
+    wire [7:0] delay [NUM_INSTR];
     genvar i, j;
     for (i=0; i<NUM_INSTR; i++) begin : gen_delays
         for (j=0; j<8; j++) begin : gen_bits
             if (i < NUM_INSTR-1) begin : gen_other
-                //memory[i] <= memory[i+1];
                 sky130_fd_sc_hd__dlygate4sd3_1 i_delay (
                     `ifdef USE_POWER_PINS
                     .VPWR(1'b1),
@@ -60,6 +52,7 @@ module shader_memory #(
             end
         end
     end
+    `endif
     
     endgenerate
 
@@ -94,7 +87,8 @@ module shader_memory #(
         end else begin
             if (shift_i) begin
                 for (int n=0; n<NUM_INSTR; n++) begin
-                    /*if (i < NUM_INSTR-1) begin
+                    `ifdef SIM
+                    if (i < NUM_INSTR-1) begin
                         memory[i] <= memory[i+1];
                     end else begin
                         // Load a new word from externally
@@ -104,9 +98,10 @@ module shader_memory #(
                         end else begin
                             memory[i] <= memory[0];
                         end
-                    end*/
-                    
+                    end
+                    `else
                     memory[n] <= delay[n];
+                    `endif
                 end
             end
         end
