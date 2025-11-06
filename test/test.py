@@ -214,7 +214,7 @@ tf = TestFactory(test_function=test_vga_load)
 tf.add_option(name='shader_name', optionlist=['test1', 'test2', 'test3', 'test4', 'test5', 'test6', 'test7', 'test8', 'test9', 'test10', 'test12', 'test13'])
 tf.generate_tests()
 
-@cocotb.test(skip=os.environ.get('GL_TEST', None) != None)
+@cocotb.test(skip=os.environ.get('GATES', None) == "yes")
 async def test_spi_shader(dut):
     """Write random data into the shader memory"""
 
