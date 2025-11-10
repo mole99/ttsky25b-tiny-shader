@@ -7,6 +7,7 @@
 > - Increased the number of instructions from 10 to 16, 60% more instructions!
 > - Increased the core clock to 50.25 MHz, therefore increasing the resolution to 80x60 pixel, 25% more pixel!
 > - The `pause_execute` signal allows you to pause execution, making it easy to upload a new shader without corruption.
+> - The `GETUSER` input source has been deprecated and is replaced by `TIME1`. Previous designs will still assemble, but use `TIME1` instead of `GETUSER`.
 >
 > Experimental:
 > - The `double_instr` signal allows you to double the number of instructions even further! From 16 to 32 instructions.
