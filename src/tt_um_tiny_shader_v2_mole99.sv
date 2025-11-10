@@ -25,8 +25,9 @@ module tt_um_tiny_shader_v2_mole99 (
     logic spi_miso;
     logic spi_cs;
     
-    logic mode;
     logic pause_execute;
+    logic double_instr;
+    logic half_resolution;
     
     logic [5:0] rrggbb;
     logic hsync;
@@ -34,9 +35,11 @@ module tt_um_tiny_shader_v2_mole99 (
     logic next_vertical;
     logic next_frame;
     
-    tiny_shader_top #(
+    logic pause_execute_sync;
+    logic double_instr_sync;
+    logic half_resolution_sync;
     
-    ) tiny_shader_top_inst (
+    tiny_shader_top tiny_shader_top_inst (
         .clk_i              (clk),
         .rst_ni             (rst_n_sync),
 
@@ -46,7 +49,9 @@ module tt_um_tiny_shader_v2_mole99 (
         .spi_miso_o         (spi_miso),
         .spi_cs_i           (spi_cs),
         
-        .pause_execute_i    (pause_execute),
+        .pause_execute_i    (pause_execute_sync),
+        .double_instr_i     (double_instr_sync),
+        .half_resolution_i  (half_resolution_sync),
 
         // SVGA signals
         .rrggbb_o           (rrggbb),
@@ -89,12 +94,42 @@ module tt_um_tiny_shader_v2_mole99 (
     assign uio_out[6] = 1'b0; assign uio_oe[6] = 1'b0;
     assign uio_out[7] = 1'b0; assign uio_oe[7] = 1'b0;
 
-    // Input PMOD - mode
+    // Input PMOD
     
-    assign pause_execute = ui_in[0]; // TODO sync
+    assign pause_execute = ui_in[0];
+    
+    synchronizer  #(
+        .FF_COUNT(2)
+    ) synchronizer_pause_execute (
+        .clk        (clk),
+        .reset_n    (1'b1),
+        .in         (pause_execute),
+        .out        (pause_execute_sync)
+    );
+    
+    assign double_instr = ui_in[1];
+    
+    synchronizer  #(
+        .FF_COUNT(2)
+    ) synchronizer_double_instr (
+        .clk        (clk),
+        .reset_n    (1'b1),
+        .in         (double_instr),
+        .out        (double_instr_sync)
+    );
+    
+    assign half_resolution = ui_in[2];
+    
+    synchronizer  #(
+        .FF_COUNT(2)
+    ) synchronizer_half_resolution (
+        .clk        (clk),
+        .reset_n    (1'b1),
+        .in         (half_resolution),
+        .out        (half_resolution_sync)
+    );
+    
     /*
-    ui_in[1]
-    ui_in[2]
     ui_in[3]
     ui_in[4]
     ui_in[5]

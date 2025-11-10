@@ -6,6 +6,12 @@
 > What is new in version 2?
 > - Increased the number of instructions from 10 to 16, 60% more instructions!
 > - Increased the core clock to 50.25 MHz, therefore increasing the resolution to 80x60 pixel, 25% more pixel!
+> - The `pause_execute` signal allows you to pause execution, making it easy to upload a new shader without corruption.
+>
+> Experimental:
+> - The `double_instr` signal allows you to double the number of instructions even further! From 16 to 32 instructions.
+> - If you double the instructions, you also need to half the resolution if you want to execute a 32-instructions long shader.
+>   Therefore, the `half_resolution` signal allows you to half the resolution. Otherwise two 16-instructions are executed for every other pixel.
 
 Modern GPUs use fragment shaders to determine the final color for each pixel. Thousands of shading units run in parallel to speed up this process and ensure that a high FPS ratio can be achieved.
 

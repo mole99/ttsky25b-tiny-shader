@@ -62,8 +62,9 @@ module tb ();
     wire spi_miso;
     wire spi_cs;
     
-    wire mode;
     wire pause_execute;
+    wire double_instr;
+    wire half_resolution;
 
     // Output PMOD - Tiny VGA
 
@@ -82,9 +83,11 @@ module tb ();
     assign spi_miso = uio_out[2];
     assign uio_in[3] = spi_sclk;
 
-    // Input PMOD - mode
+    // Input PMOD
     
     assign ui_in[0] = pause_execute;
+    assign ui_in[1] = double_instr;
+    assign ui_in[2] = half_resolution;
 
     // Replace tt_um_example with your module name:
     tt_um_tiny_shader_v2_mole99 tt_um_tiny_shader_v2_mole99_inst (

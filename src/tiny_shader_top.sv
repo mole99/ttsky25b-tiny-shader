@@ -19,6 +19,13 @@ module tiny_shader_top (
     //       current pixel has been finished
     input  logic pause_execute_i,
     
+    // Double the number of instructions
+    // Needs DOUBLE_INSTR to be 1
+    input  logic double_instr_i,
+    
+    // Half the resolution
+    input  logic half_resolution_i,
+    
     // SVGA signals
     output logic [5:0] rrggbb_o,
     output logic       hsync_o,
@@ -30,6 +37,8 @@ module tiny_shader_top (
     /* Tiny Shader Settings */
     
     localparam NUM_INSTR = 16;
+    localparam DOUBLE_INSTR = 1'b1;
+    localparam TOTAL_NUM_INSTR = DOUBLE_INSTR ? NUM_INSTR * 2 : NUM_INSTR;
 
     /*
         VGA 640x480 @ 60 Hz
@@ -183,7 +192,9 @@ module tiny_shader_top (
     
     // Execute shader only when in active drawing area and not paused
     assign execute_shader_y = counter_v >= 0 && counter_v < HEIGHT;
-    assign execute_shader_x = counter_h+(NUM_INSTR/2) >= 0 && counter_h+(NUM_INSTR/2) < WIDTH;
+    assign execute_shader_x = half_resolution_i ?
+                              counter_h+(NUM_INSTR) >= 0 && counter_h+(NUM_INSTR) < WIDTH :
+                              counter_h+(NUM_INSTR/2) >= 0 && counter_h+(NUM_INSTR/2) < WIDTH;
     assign execute_shader = execute_shader_x && execute_shader_y && !pause_execute_sync;
 
     logic execute_shader_d;
@@ -195,14 +206,16 @@ module tiny_shader_top (
     /* Shader Memory */
 
     shader_memory #(
-        .NUM_INSTR (NUM_INSTR)
+        .NUM_INSTR    (NUM_INSTR),
+        .DOUBLE_INSTR (DOUBLE_INSTR)
     ) shader_memory_inst (
-        .clk_i      (clk_i),
-        .rst_ni     (rst_ni),
-        .shift_i    (execute_shader || memory_shift),
-        .load_i     (memory_load),
-        .instr_i    (memory_instr),
-        .instr_o    (instr)
+        .clk_i        (clk_i),
+        .rst_ni       (rst_ni),
+        .shift_i      (execute_shader || memory_shift),
+        .load_i       (memory_load),
+        .double_instr_i (double_instr_i),
+        .instr_i      (memory_instr),
+        .instr_o      (instr)
     );
     
     /* Count x and y positions */
@@ -213,8 +226,12 @@ module tiny_shader_top (
     logic [$clog2(WIDTH_SMALL)  - 1:0] x_pos;
     logic [$clog2(HEIGHT_SMALL) - 1:0] y_pos;
     
-    assign x_pos = (counter_h+(NUM_INSTR/2)) / (NUM_INSTR/2);
-    assign y_pos = counter_v / (NUM_INSTR/2); // TODO
+    assign x_pos = half_resolution_i ?
+                    (counter_h+(NUM_INSTR)) / (NUM_INSTR) :
+                    (counter_h+(NUM_INSTR/2)) / (NUM_INSTR/2);
+    assign y_pos = half_resolution_i ?
+                    counter_v / (NUM_INSTR) :
+                    counter_v / (NUM_INSTR/2);
     
     /* Shader execution */
     
@@ -230,13 +247,13 @@ module tiny_shader_top (
         .x_pos_i    (x_pos[5:0]),
         .y_pos_i    (y_pos[5:0]),
         
-        .time0_i     (cur_time[8:3]),
-        .time1_i     (cur_time[5:0]),
+        .time0_i    (cur_time[8:3]),
+        .time1_i    (cur_time[5:0]),
         
         .rgb_o      (rgb_o)
     );
     
-    logic [3:0] capture_counter;
+    logic [$clog2(NUM_INSTR * 2)-1:0] capture_counter;
     
     always_ff @(posedge clk_i, negedge rst_ni) begin
         if (!rst_ni) begin
@@ -244,6 +261,12 @@ module tiny_shader_top (
         end else begin
             if (execute_shader) begin
                 capture_counter <= capture_counter + 1;
+                
+                if (!half_resolution_i) begin
+                  if (capture_counter == NUM_INSTR-1) begin
+                    capture_counter <= '0;
+                  end
+                end
             end
         end
     end

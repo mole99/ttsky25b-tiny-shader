@@ -115,6 +115,8 @@ async def test_vga_default(dut):
     # Assign default values
     dut.ena.value = 1
     dut.pause_execute.value = 0 # run shader
+    dut.double_instr.value = 0 # normal amount of instructions
+    dut.half_resolution.value = 0 # normal resolution
     
     dut.spi_sclk.value = 0
     dut.spi_mosi.value = 0
@@ -139,6 +141,86 @@ async def test_vga_default(dut):
 
     image = await task_draw_frame.join()
     image.save(f"images/default2.png")
+
+    await ClockCycles(dut.clk, 10)
+
+@cocotb.test()
+async def test_vga_default_double_normal(dut):
+    """Draw two frames with the default shader"""
+
+    # Start the clock
+    c = Clock(dut.clk, 20, 'ns')
+    await cocotb.start(c.start())
+
+    # Assign default values
+    dut.ena.value = 1
+    dut.pause_execute.value = 0 # run shader
+    dut.double_instr.value = 1 # double # instructions
+    dut.half_resolution.value = 0 # half the resolution
+    
+    dut.spi_sclk.value = 0
+    dut.spi_mosi.value = 0
+    #wire spi_miso;
+    dut.spi_cs.value = 0
+
+    # Reset
+    await reset_dut(dut.rst_n, 50)
+    dut._log.info("Reset done")
+    
+    # Sync to start of frame
+    await sync_frame(dut)
+    
+    # Start thread to draw frame
+    task_draw_frame = await cocotb.start(draw_frame(dut))
+
+    image = await task_draw_frame.join()
+    image.save(f"images/default_double.png")
+    
+    # Start thread to draw frame
+    task_draw_frame = await cocotb.start(draw_frame(dut))
+
+    image = await task_draw_frame.join()
+    image.save(f"images/default_double2.png")
+
+    await ClockCycles(dut.clk, 10)
+
+@cocotb.test()
+async def test_vga_default_double_half(dut):
+    """Draw two frames with the default shader"""
+
+    # Start the clock
+    c = Clock(dut.clk, 20, 'ns')
+    await cocotb.start(c.start())
+
+    # Assign default values
+    dut.ena.value = 1
+    dut.pause_execute.value = 0 # run shader
+    dut.double_instr.value = 1 # double # instructions
+    dut.half_resolution.value = 1 # half the resolution
+    
+    dut.spi_sclk.value = 0
+    dut.spi_mosi.value = 0
+    #wire spi_miso;
+    dut.spi_cs.value = 0
+
+    # Reset
+    await reset_dut(dut.rst_n, 50)
+    dut._log.info("Reset done")
+    
+    # Sync to start of frame
+    await sync_frame(dut)
+    
+    # Start thread to draw frame
+    task_draw_frame = await cocotb.start(draw_frame(dut))
+
+    image = await task_draw_frame.join()
+    image.save(f"images/default_double_half.png")
+    
+    # Start thread to draw frame
+    task_draw_frame = await cocotb.start(draw_frame(dut))
+
+    image = await task_draw_frame.join()
+    image.save(f"images/default_double_half2.png")
 
     await ClockCycles(dut.clk, 10)
 
@@ -182,6 +264,8 @@ async def test_vga_load(dut, shader_name='test7'):
     # Assign default values
     dut.ena.value = 1
     dut.pause_execute.value = 1 # pause shader
+    dut.double_instr.value = 0 # normal # instructions
+    dut.half_resolution.value = 0 # normal resolution
 
     # Reset
     await reset_dut(dut.rst_n, 50)
@@ -243,6 +327,8 @@ async def test_spi_shader(dut):
     # Assign default values
     dut.ena.value = 1
     dut.pause_execute.value = 1 # pause shader
+    dut.double_instr.value = 0 # normal # instructions
+    dut.half_resolution.value = 0 # normal resolution
 
     # Reset
     await reset_dut(dut.rst_n, 50)
